@@ -2,28 +2,78 @@
 
 
 ## AIM
-Write the experiment AIM.
+To develop a Python program to find the optimal policy for the given RL environment using Q-Learning and compare the state values with the Monte Carlo method.
 
 ## PROBLEM STATEMENT
-Explain the problem statement.
+Develop a Python program to derive the optimal policy using Q-Learning and compare state values with Monte Carlo method.
 
 ## Q LEARNING ALGORITHM
-Include the steps involved in the Q Learning algorithm
+→ Initialize Q-table and hyperparameters.<br>
+→ Choose an action using the epsilon-greedy policy and execute the action, observe the next state, reward, and update Q-values and repeat until episode ends.<br>
+→ After training, derive the optimal policy from the Q-table.<br>
+→ Implement the Monte Carlo method to estimate state values.<br>
+→ Compare Q-Learning policy and state values with Monte Carlo results for the given RL environment.<br>
 
 ## Q LEARNING FUNCTION
-### Name:
-### Register Number:
+### Name: DHARMARAJ S
+### Register Number: 212222240025
 
+```
 
+def q_learning(env,
+               gamma=1.0,
+               init_alpha=0.5,
+               min_alpha=0.01,
+               alpha_decay_ratio=0.5,
+               init_epsilon=1.0,
+               min_epsilon=0.1,
+               epsilon_decay_ratio=0.9,
+               n_episodes=3000):
+    nS, nA = env.observation_space.n, env.action_space.n
+    pi_track = []
+    Q = np.zeros((nS, nA), dtype=np.float64)
+    Q_track = np.zeros((n_episodes, nS, nA), dtype=np.float64)
 
+    select_action = lambda state, Q, epsilon: np.argmax(Q[state]) if np.random.random() > epsilon else np.random.randint(len(Q[state]))
+    alphas = decay_schedule(init_alpha, min_alpha, alpha_decay_ratio, n_episodes)
+    epsilon = decay_schedule(init_epsilon, min_epsilon, epsilon_decay_ratio, n_episodes)
+
+    for e in tqdm(range(n_episodes), leave=False):
+        state, done = env.reset(), False
+        while not done:
+          action = select_action(state, Q, epsilon[e])
+          next_state, reward, done, _ = env.step(action)
+          td_target = reward + gamma * Q[next_state].max() * (not done)
+          td_error = td_target - Q[state][action]
+          Q[state][action] = Q[state][action] + alphas[e] * td_error
+          state = next_state
+
+        Q_track[e] = Q
+        pi_track.append(np.argmax(Q, axis=1))
+    V = np.max(Q, axis=1)
+    pi = lambda s: {s:a for s, a in enumerate(np.argmax(Q, axis=1))}[s]
+
+    return Q, V, pi, Q_track, pi_track
+
+```
 
 
 
 ## OUTPUT:
-Mention the optimal policy, optimal value function , success rate for the optimal policy.
 
-Include plot comparing the state value functions of Monte Carlo method and Qlearning.
+### Optimal State Value Functions:
+<img width="1186" height="166" alt="image" src="https://github.com/user-attachments/assets/070dd046-4cbb-460c-9925-8d738e47abf4" />
+
+### Optimal Action Value Functions:
+<img width="763" height="554" alt="image" src="https://github.com/user-attachments/assets/0f128744-5bfe-4740-b9ac-9c20645990b0" />
+<img width="1341" height="65" alt="image" src="https://github.com/user-attachments/assets/f3719c7a-b53e-40a5-92eb-67488a2ffc51" />
+
+### State value functions of Monte Carlo method:
+<img width="1163" height="494" alt="image" src="https://github.com/user-attachments/assets/2bdcb129-b1e7-4738-861f-5cd90815b2a0" />
+
+### State value functions of Qlearning method:
+<img width="1140" height="487" alt="image" src="https://github.com/user-attachments/assets/1c93b30c-4270-4d9c-8530-c234d722e6d8" />
+
 
 ## RESULT:
-
-Write your result here
+Thus, Q-Learning outperformed Monte Carlo in finding the optimal policy and state values for the RL problem.
